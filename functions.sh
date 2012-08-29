@@ -158,7 +158,7 @@ function install_chef() {
     #echo chef chef/chef_server_url string http://$chef:4000 | debconf-set-selections
     mkdir -p /etc/chef
     #if [ ! -e /opt/rpcs/chef-full.deb ]; then
-    if [ ! -e /opt/rpcs/embedded ]; then
+    if [ ! -e /opt/chef/embedded ]; then
         run_twice curl -L http://opscode.com/chef/install.sh | bash 1>/dev/null
     #else
     #    dpkg -i /opt/rpcs/chef-full.deb 1>/dev/null
@@ -197,12 +197,15 @@ EOF
 }
 
 function config_interfaces {
-    if ! grep -q "$net_bridge" /etc/network/interfaces; then
-        cat >> /etc/network/interfaces << EOF
+    if [ ! -e /etc/sysconfig/network-scripts/ifcfg-${net_bridge} ]; then
+        if [ $net_private_iface != $net_public_iface ]; then
+            echo "BRIDGE=${net_bridge}" >> /etc/sysconfig/network-scripts/ifcfg-${net_private_iface}
+        fi
 
-auto $net_bridge
-iface $net_bridge inet manual
-    bridge_ports $([ $net_private_iface = $net_public_iface ] && echo none || echo $net_private_iface)
+        cat > /etc/sysconfig/network-scripts/ifcfg-${net_bridge} << EOF
+DEVICE="$net_bridge"
+ONBOOT="yes"
+TYPE=Bridge
 EOF
     fi
 }
@@ -250,7 +253,7 @@ function build_chef_server {
   <currentMemory>2097152</currentMemory>
   <vcpu>2</vcpu>
   <os>
-    <type arch='x86_64' machine='pc-0.12'>hvm</type>
+    <type arch='x86_64' machine='pc'>hvm</type>
     <boot dev='hd'/>
   </os>
   <features>
@@ -314,7 +317,7 @@ EOF
 DEVICE="chefbr0"
 NM_CONTROLLED="no"
 ONBOOT="yes"
-IPADDR=168.254.123.1
+IPADDR=169.254.123.1
 NETMASK=255.255.255.0
 TYPE=Bridge
 EOF
@@ -350,7 +353,7 @@ function port_test() { # $1 delay, $2 max, $3 host, $4 port
     local count=1
     while (( $count <= $2 )); do
         do_substatus $(get_float $count $2) "Waiting for $3:$4 to become available (try $count of $2)" "port-test"
-        if nc -w 1 -q 0 $3 $4  < /dev/null &> /dev/null; then
+        if nc -w 1 $3 $4  < /dev/null &> /dev/null; then
             do_substatus_close
             break
         fi
@@ -361,16 +364,19 @@ function port_test() { # $1 delay, $2 max, $3 host, $4 port
 
 function generate_and_copy_ssh_keys {
     do_substatus 10 "Generating new SSH key" "ssh-keys"
-    mkdir -p .ssh; chmod 0700 .ssh
-    ssh-keygen -q -f .ssh/id_rsa -N ''
-    cat > .ssh/known_hosts << "EOF"
-|1|IDUzyhtkjSOlIdtFsTniYm7JJvA=|UGu+9OaDzOMhgL+tr+aNEOmkd98= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBMHsA41RW2BGZS9osE5JvfxcZchz+W57PVqul8THkIQVehqoWxzMJkq16RQxylpV22EUXSiBj1bfKhy2/dkkpn4=
-|1|RwkLZbV+0oIX4vCDsr7mWVRs1gc=|U2e6O501zzVFJ3dFkHdN/ZCp+Ko= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBMHsA41RW2BGZS9osE5JvfxcZchz+W57PVqul8THkIQVehqoWxzMJkq16RQxylpV22EUXSiBj1bfKhy2/dkkpn4=
-|1|eE+nAqfyigLQhi+nd/VkTUmbss0=|GFCPoZvEPOUcDdQEma8/7QILaNU= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBMHsA41RW2BGZS9osE5JvfxcZchz+W57PVqul8THkIQVehqoWxzMJkq16RQxylpV22EUXSiBj1bfKhy2/dkkpn4=
+    if [ ! -e ~/.ssh ]; then
+        mkdir -p .ssh; chmod 0700 .ssh
+        ssh-keygen -q -f .ssh/id_rsa -N ''
+    fi
+    cat >> .ssh/known_hosts << "EOF"
+169.254.123.2 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDRwNlxyIJKFlII3NZx2XfflvgLMACNg0GSvmtRY/Ed9QqLaoo2nQ4RjEIAUuXt/Rw3+MxZ+PWwq0/QBDA+thtwnw6k/Eo7EhZ0Lh7uv5IXckNV/FK4Hr5L1fv/ps4IHFDTJKLrP/xZr2eyIbuWJyo9vJCPnSRu+qzRbYw6WHMatJroIkM51425bG9MklAlV1Br2ikB0Bh8sshn4ZzWEJo5f/go/qWmwToqY8m5yfwQ91lQYGb6lOkH+LUVhs2KNBfCuXymZY72BylRwgbkLJhyJ3YIUdIMeIe66UJOtLY40c2aX8zmQfRJXi6cIeIqumkCPsENL/Lw/iXxg8MVl7G5
 EOF
 
     do_substatus 20 "Copying new key in ..." "ssh-keys"
-    sshpass -p demo ssh-copy-id -i .ssh/id_rsa.pub rack@$chef 1>/dev/null
+    mv /usr/bin/ssh-copy-id /usr/bin/ssh-copy-id.orig
+    cp /opt/rpcs/resources/ssh-copy-id /usr/bin/ssh-copy-id
+    chmod +x /usr/bin/ssh-copy-id
+    sshpass -p demo ssh-copy-id -i ~/.ssh/id_rsa.pub rack@$chef 1>/dev/null
 
     do_substatus 30 "Setting new password ..." "ssh-keys"
     ssh rack@$chef "sudo chpasswd" <<< "rack:$(pwgen -s 12 1)"

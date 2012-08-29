@@ -18,7 +18,7 @@ STATUS_FIFO=/opt/rpcs/.status_fifo
 #set -o nounset
 set -o errexit # TODO: Make trap that complains loudly somewhere if we fail?
 shopt -s extdebug # inherit trap handlers in functions, just in case
-trap do_exit ERR EXIT SIGINT SIGTERM
+#trap do_exit ERR EXIT SIGINT SIGTERM
 
 if [ -e /opt/rpcs/.status ]; then rm -f /opt/rpcs/.status; fi;
 fqdn=$(hostname -f)
@@ -44,7 +44,7 @@ if [ $role = "Compute" ]; then
 fi
 
 do_status 5 "Upgrading packages"
-apt_it_up
+#apt_it_up
 
 do_status 10 "Installing chef client"
 install_chef
@@ -86,6 +86,7 @@ if [ $role = "Controller" ] || [ $role = "All-In-One" ]; then
 
     do_status 62 "Generating and copying ssh keys"
     generate_and_copy_ssh_keys
+    echo 'generate_and_copy_ssh_keys'
 
     do_status 70 "Waiting for API server to start"
     port_test 30 20 $chef 4000
