@@ -627,8 +627,8 @@ function run_chef() {
 
 function setup_chef_initscripts() {
     echo "setting up chef-client init scripts..."
-    cp /opt/chef/embedded/lib/ruby/gems/1.9.1/gems/chef-10.12.0/distro/redhat/etc/init/chef-client.conf /etc/init/chef.conf
-    cp /opt/chef/embedded/lib/ruby/gems/1.9.1/gems/chef-10.12.0/distro/redhat/etc/default/chef-client /etc/default/chef-client
+    cp /opt/chef/embedded/lib/ruby/gems/1.9.1/gems/chef-10.12.0/distro/redhat/etc/sysconfig/chef-client /etc/init/chef-client
+    cp /opt/chef/embedded/lib/ruby/gems/1.9.1/gems/chef-10.12.0/distro/redhat/etc/rsyslog.d/chef-client /etc/rsyslog.d/chef-client
     cp /opt/chef/embedded/lib/ruby/gems/1.9.1/gems/chef-10.12.0/distro/redhat/etc/init.d/chef-client /etc/init.d/chef-client
     mkdir -p /var/log/chef
     /etc/init.d/chef-client start
