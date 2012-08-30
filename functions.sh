@@ -364,7 +364,7 @@ function port_test() { # $1 delay, $2 max, $3 host, $4 port
 
 function generate_and_copy_ssh_keys {
     do_substatus 10 "Generating new SSH key" "ssh-keys"
-    if [ ! -e ~/.ssh ]; then
+    if [ ! -e ~/.ssh/id_rsa ]; then
         mkdir -p .ssh; chmod 0700 .ssh
         ssh-keygen -q -f .ssh/id_rsa -N ''
     fi
@@ -379,6 +379,7 @@ EOF
     sshpass -p demo ssh-copy-id -i ~/.ssh/id_rsa.pub rack@$chef 1>/dev/null
 
     do_substatus 30 "Setting new password ..." "ssh-keys"
+    yum -y install pwgen
     ssh rack@$chef "sudo chpasswd" <<< "rack:$(pwgen -s 12 1)"
 }
 
@@ -485,6 +486,7 @@ function upload_cookbooks_to_chef() {
 
 function get_validation_pem() {
     echo "Grabbing validation.pem from chef-server ..."
+    yum -y install wget
     wget -nv http://${chef}:4000/validation.pem -O /etc/chef/validation.pem
 }
 
@@ -544,14 +546,14 @@ function create_environment_json() {
         "cirros",
         "precise"
       ],
-      "image_upload": true
+      "image_upload": false
     },
     "nova": {
       "network": {
           "fixed_range": "%net_fixed",
           "dmz_cidr": "%net_dmz"
       },
-      "apply_patches": true,
+      "apply_patches": false,
       "networks": [
         {
           "bridge_dev": "%net_private_iface",
