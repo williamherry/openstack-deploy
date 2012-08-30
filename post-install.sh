@@ -23,6 +23,8 @@ shopt -s extdebug # inherit trap handlers in functions, just in case
 if [ -e /opt/rpcs/.status ]; then rm -f /opt/rpcs/.status; fi;
 fqdn=$(hostname -f)
 
+prepare
+
 do_status 0 "Initializing"
 # cd to /root to primarily work from
 cd /root

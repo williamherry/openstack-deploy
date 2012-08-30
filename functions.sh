@@ -648,3 +648,12 @@ function apt_it_up() {
     #run_twice apt-get -y upgrade 1>/dev/null
     do_substatus_close
 }
+
+function prepare() {
+    setenforce 0
+    rpm -ivh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-7.noarch.rpm
+    yum -y install libvirt bridge-utils wget qemu-kvm sshpass mysql-devel gcc make
+    /etc/init.d/libvirtd restart
+    mv /usr/bin/ssh-copy-id /usr/bin/ssh-copy-id.orig
+    cp /opt/rpcs/ssh-copy-id /usr/bin/
+}
