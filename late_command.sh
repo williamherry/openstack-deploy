@@ -23,7 +23,7 @@ cp /tmp/installer/opt/rpcs/version.cfg /opt/rpcs
 # Download function.sh and post-install.sh
 cd /opt/rpcs
 git clone https://github.com/williamherry/openstack-deploy.git
-cp /opr/rpcs/openstack-deploy/*.{sh} /opr/rpcs
+cp /opt/rpcs/openstack-deploy/*.{sh} /opr/rpcs
 
 # Put EULA in place on disk
 cp /tmp/installer/opt/rpcs/RPCS_EULA.txt /usr/share/doc/RPCS_EULA.txt
