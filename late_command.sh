@@ -21,7 +21,7 @@ cp /tmp/installer/opt/rpcs/*.{rb,sh} /opt/rpcs
 cp /tmp/installer/opt/rpcs/version.cfg /opt/rpcs
 
 # Download function.sh and post-install.sh
-cd /opr/rpcs
+cd /opt/rpcs
 git clone https://github.com/williamherry/openstack-deploy.git
 cp /opr/rpcs/openstack-deploy/*.{sh} /opr/rpcs
 
