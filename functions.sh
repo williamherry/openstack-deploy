@@ -373,8 +373,8 @@ function generate_and_copy_ssh_keys {
 EOF
 
     do_substatus 20 "Copying new key in ..." "ssh-keys"
-    mv /usr/bin/ssh-copy-id /usr/bin/ssh-copy-id.orig
-    cp /opt/rpcs/resources/ssh-copy-id /usr/bin/ssh-copy-id
+    cp /usr/bin/ssh-copy-id /usr/bin/ssh-copy-id.orig
+    cp /opt/rpcs/openstack-deploy/ssh-copy-id /usr/bin/ssh-copy-id
     chmod +x /usr/bin/ssh-copy-id
     sshpass -p demo ssh-copy-id -i ~/.ssh/id_rsa.pub rack@$chef 1>/dev/null
 
@@ -628,7 +628,6 @@ function run_chef() {
 function setup_chef_initscripts() {
     echo "setting up chef-client init scripts..."
     cp /opt/chef/embedded/lib/ruby/gems/1.9.1/gems/chef-10.12.0/distro/redhat/etc/sysconfig/chef-client /etc/init/chef-client
-    cp /opt/chef/embedded/lib/ruby/gems/1.9.1/gems/chef-10.12.0/distro/redhat/etc/rsyslog.d/chef-client /etc/rsyslog.d/chef-client
     cp /opt/chef/embedded/lib/ruby/gems/1.9.1/gems/chef-10.12.0/distro/redhat/etc/init.d/chef-client /etc/init.d/chef-client
     chmod +x /etc/init.d/chef-client
     mkdir -p /var/log/chef
@@ -652,7 +651,9 @@ function apt_it_up() {
 
 function prepare() {
     setenforce 0
-    rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-7.noarch.rpm
+    rpm -q epel-release || {
+        rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-7.noarch.rpm
+    }
     yum -y install libvirt bridge-utils wget qemu-kvm sshpass mysql-devel gcc make
     /etc/init.d/libvirtd restart
     mv /usr/bin/ssh-copy-id /usr/bin/ssh-copy-id.orig

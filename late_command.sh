@@ -17,19 +17,20 @@ echo "UseDNS no" >> /etc/ssh/sshd_config
 #update-alternatives --set text.plymouth /lib/plymouth/themes/rpcs-text/rpcs-text.plymouth
 
 # Move installer items into target from bind mount
+mkdir /opt/rpcs
 cp /tmp/installer/opt/rpcs/*.{rb,sh} /opt/rpcs
 cp /tmp/installer/opt/rpcs/version.cfg /opt/rpcs
 
 # Download function.sh and post-install.sh
 cd /opt/rpcs
 git clone https://github.com/williamherry/openstack-deploy.git
-cp /opt/rpcs/openstack-deploy/*.{sh} /opr/rpcs
+cp /opt/rpcs/openstack-deploy/*.sh /opt/rpcs
 
 # Put EULA in place on disk
 cp /tmp/installer/opt/rpcs/RPCS_EULA.txt /usr/share/doc/RPCS_EULA.txt
 
 # Move the base images and chef deb to /opt/rpcs
-cp /tmp/installer/opt/rpcs/resources/*.{gz,deb} /opt/rpcs
+#cp /tmp/installer/opt/rpcs/resources/*.{gz,deb} /opt/rpcs
 
 # copy over any config values from the builder
 cat /tmp/installer/opt/rpcs/rpcs.cfg >> /opt/rpcs/rpcs.cfg
