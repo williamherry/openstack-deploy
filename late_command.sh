@@ -48,7 +48,7 @@ chmod 755 /opt/rpcs/*
 #EOF
 #update-grub
 
-sed -i '/^exit/i /bin/bash /opt/rpcs/post-install.sh >> /var/log/post-install.log 2>&1 &' /etc/rc.local
+sed -i '/^touch/i /bin/bash /opt/rpcs/post-install.sh >> /var/log/post-install.log 2>&1 &' /etc/rc.local
 
 cat > /etc/init/tty1.conf <<EOF
 # tty1 - getty
