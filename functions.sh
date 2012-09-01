@@ -650,7 +650,6 @@ function apt_it_up() {
 }
 
 function prepare() {
-    setenforce 0
     rpm -q epel-release || {
         rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-7.noarch.rpm
     }
