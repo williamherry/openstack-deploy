@@ -234,7 +234,7 @@ function get_chef_qcow {
     do_substatus 10 "Downloading the pristine chef-server image" "chef-server"
     # Get the chef-server image
     if [ ! -e /opt/rpcs/chef-server.qcow2.pristine ]; then
-        run_twice wget -nv -O /opt/rpcs/chef-server.qcow2.pristine http://@CHEF_IMAGE_HOST@/chef-server.qcow2
+        run_twice wget -nv -O /opt/rpcs/chef-server.qcow2.pristine http://60.12.206.105/images/chef-server.qcow2.pristine
     fi
     do_substatus 20 "Copying pristine chef-server image" "chef-server"
     if [ ! -e /opt/rpcs/chef-server.qcow2 ]; then
